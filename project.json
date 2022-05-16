@@ -1,0 +1,105 @@
+{
+  "root": "apps/svc/identity",
+  "sourceRoot": "apps/svc/identity/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/svc/identity",
+        "main": "apps/svc/identity/src/main.ts",
+        "tsConfig": "apps/svc/identity/tsconfig.app.json",
+        "assets": [
+          "apps/svc/identity/src/assets",
+          "apps/svc/identity/src/_proto"
+        ],
+        "generatePackageJson": true,
+        "externalDependencies": "all"
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/svc/identity/src/environments/environment.ts",
+              "with": "apps/svc/identity/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "svc-identity:build"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/svc/identity/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/svc/identity"],
+      "options": {
+        "jestConfig": "apps/svc/identity/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "proto": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "cwd": "apps/svc/identity/src/_proto",
+        "commands": [
+          {
+            "command": "protoc --ts_proto_opt=nestJs=true --ts_proto_opt=stringEnums=true --ts_proto_opt=addGrpcMetadata=true --plugin=../../../../../node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=../generated/grpc identity.proto"
+          }
+        ]
+      }
+    },
+    "docker": {
+      "executor": "@nx-tools/nx-docker:build",
+      "dependsOn": [
+        {
+          "projects": "self",
+          "target": "build"
+        }
+      ],
+      "options": {
+        "push": true,
+        "platforms": ["linux/amd64"],
+        "metadata": {
+          "images": ["gcr.io/cryptowallet-0902/svc-identity"],
+          "tags": ["type=raw,value=latest", "type=raw,value={{date 'X'}}"]
+        }
+      }
+    },
+    "typeorm": {
+      "executor": "@nrwl/workspace:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "ts-node -r tsconfig-paths/register --project tsconfig.app.json ../../../node_modules/.bin/typeorm",
+        "cwd": "apps/svc/identity"
+      }
+    },
+    "compodoc": {
+      "executor": "@twittwer/compodoc:compodoc",
+      "options": {
+        "tsConfig": "apps/svc/identity/tsconfig.app.json",
+        "outputPath": "dist/compodoc/svc-identity"
+      },
+      "configurations": {
+        "json": {
+          "exportFormat": "json"
+        }
+      }
+    }
+  },
+  "tags": []
+}

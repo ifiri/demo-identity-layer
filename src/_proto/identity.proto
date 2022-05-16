@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package identity;
+
+message Identity {
+  string id = 1;
+  string email = 2;
+  bool emailVerified = 3;
+  string createdAt = 5;
+  string updatedAt = 6;
+}
+
+message CreateIdentityInput {
+  string email = 1;
+}
+
+message CreateIdentityOutput {
+  bool success = 1;
+  optional Identity identity = 2;
+}
+
+message RequestIdentityVerificationInput {
+  enum RequestIdentityVerificationViaType {
+    EMAIL = 0;
+  }
+  string id = 1;
+  RequestIdentityVerificationViaType via = 2;
+}
+
+message RequestIdentityVerificationOutput {
+  bool success = 1;
+  optional Identity identity = 2;
+}
+
+message SubmitIdentityVerificationCodeInput {
+  string code = 1;
+}
+
+message SubmitIdentityVerificationCodeOutput {
+  bool success = 1;
+}
+
+service IdentityRpc {
+  rpc CreateIdentity(CreateIdentityInput) returns (CreateIdentityOutput);
+  rpc RequestIdentityVerification(RequestIdentityVerificationInput) returns (RequestIdentityVerificationOutput);
+  rpc SubmitIdentityVerificationCode(SubmitIdentityVerificationCodeInput) returns (SubmitIdentityVerificationCodeOutput);
+}
+
